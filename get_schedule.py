@@ -47,7 +47,7 @@ def get_captcha(url):
     captcha = r.content
     # 保存验证码至当前文件夹
     try:
-        with open(os.getcwd()+'\\'+'captcha.jpg','wb') as jpg:
+        with open('captcha.jpg','wb') as jpg:
             jpg.write(captcha)
     except IOError:
         print('IO Error\n')
@@ -58,7 +58,7 @@ def get_captcha(url):
     checkcode = input('Enter the captcha：')
     return checkcode
 
-def login_in(url):
+def log_in(url):
     global s
     login_info = {'__VIEWSTATE': viewstate,
                   '__EVENTVALIDATION': eventvalidation,
@@ -79,28 +79,38 @@ def get_schedule(url):
     '''
     global s
     init = s.get(url)
-    bs = BeautifulSoup(init.content,'lxml')
+    bs = BeautifulSoup(init.text,'lxml')
     table0 = bs.find('table',{'id':'ctl00_MainContentPlaceHolder_GridScore'})
     for child in table0.children:
-            print(child)
+        print('----------------')
+        print(type(child))
+        print(child)
+        print('----------------')
 
+    sel_year = int(input('请输入需要查询的学年：'))
+    sel_term = int(input('请输入需要查询的学期：'))
     select = {'__EVENTTARGET':'',
               '__EVENTARGUMENT':'',
               '__VIEWSTATE':viewstate,
               '__EVENTVALIDATION':eventvalidation,
-              'ctl00$MainContentPlaceHolder$School_Year':'2017',
-              'ctl00$MainContentPlaceHolder$School_Term':'1',
+              'ctl00$MainContentPlaceHolder$School_Year':sel_year,
+              'ctl00$MainContentPlaceHolder$School_Term':sel_term,
               'ctl00$MainContentPlaceHolder$BtnSearch.x':'18',
               'ctl00$MainContentPlaceHolder$BtnSearch.y':'3'}
     
     r = s.post(url,data=select)
     print('Get schedule:{}'.format(r.status_code))
-    bs = BeautifulSoup(r.content,'lxml')
+    bs = BeautifulSoup(r.text,'lxml')
     table1 = bs.find('table',{'id':'ctl00_MainContentPlaceHolder_GridScore'})
     for child in table1.children:
-            print(child.get_text())
+        print(child)
     print(len(table1))
-    
+
+def log_out(url):
+    global s
+    xttc = s.get(url)
+    print(xttc.status_code)
+
 if __name__ == '__main__':
     print('欢迎使用闵冲的自制查询课表脚本！')
     port = input('请选择查询端口：81端口 or 84端口？')
@@ -109,6 +119,7 @@ if __name__ == '__main__':
 
     host = 'http://jwc.ctgu.edu.cn:{}/'.format(port)
     login_url = 'jwc_glxt/Login.aspx'
+    logout_url = 'jwc_glxt/Login.aspx?xttc=1'
     captcha_url = 'jwc_glxt/ValidateCode.aspx'
     schedule_url = 'jwc_glxt/Course_Choice/Course_Schedule.aspx'
     s = requests.session()
@@ -122,9 +133,9 @@ if __name__ == '__main__':
                '_gscu_891807511':''}
 
     # 登陆按钮图片尺寸：69*43
-    login_in(host+login_url)
+    log_in(host+login_url)
     get_schedule(host+schedule_url)
-
+    log_out(host+logout_url)
     '''
     选修课表：http://jwc.ctgu.edu.cn:81/jwc_glxt/Course_Choice/Course_Schedule.aspx
     id="ct100_Menu1n9"
