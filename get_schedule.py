@@ -2,7 +2,6 @@
 # -*- coding:utf-8 -*-
 import os,sys,re
 import requests
-from lxml import etree
 from bs4 import BeautifulSoup
 import getpass
 # from prettytable import PrettyTable
@@ -10,7 +9,7 @@ import getpass
 def get_sessionID(url):
     global s
     r = s.get(url)
-    print('Get session:{}'.format(r.status_code))
+    print('Get session: {}'.format(r.status_code))
     sessionID = r.headers['Set-Cookie'].split(';')[0].split('=')[1]
     return sessionID
 
@@ -43,7 +42,7 @@ def get_captcha(url):
     # 验证码图片尺寸：60 * 25
     global s
     r = s.get(url,stream=True)
-    print('Get captcha:{}'.format(r.status_code))
+    print('Get captcha: {}'.format(r.status_code))
     captcha = r.content
     # 保存验证码至当前文件夹
     try:
@@ -67,7 +66,7 @@ def log_in(url):
                   'btnLogin.x':"57", 'btnLogin.y':"23",
                   'CheckCode':checkcode}
     r = s.post(host+login_url,data=login_info)
-    print('Login in:{}'.format(r.status_code))
+    print('Log in: {}'.format(r.status_code))
 
 def get_schedule(url):
     '''
@@ -79,14 +78,25 @@ def get_schedule(url):
     '''
     global s
     init = s.get(url)
-    bs = BeautifulSoup(init.text,'lxml')
+    bs = BeautifulSoup(init.content.decode('utf-8'),'lxml')
     table0 = bs.find('table',{'id':'ctl00_MainContentPlaceHolder_GridScore'})
+    schedule = []
     for child in table0.children:
-        print('----------------')
-        print(type(child))
-        print(child)
-        print('----------------')
+        box = []
+        for i in child:
+            diff = []
+            if hasattr(i,'get_text'):
+                pattern = r'[\u4e00-\u9fa5]+ [A-Z]-\d{3,4}\s\d\d-\d\d?[\u4e00-\u9fa5]\s[\u4e00-\u9fa5]+''
+                if re.match(pattern,i.get_text()):
+                    pass
+                box.append(i.get_text().replace(u'\xa0',u' '))
+        schedule.append(box)
+    with open('table.txt','w+',encoding='utf-8') as saveit:
+        for box in schedule:
+            for i in box:
+                saveit.write(i)
 
+    '''
     sel_year = int(input('请输入需要查询的学年：'))
     sel_term = int(input('请输入需要查询的学期：'))
     select = {'__EVENTTARGET':'',
@@ -104,12 +114,12 @@ def get_schedule(url):
     table1 = bs.find('table',{'id':'ctl00_MainContentPlaceHolder_GridScore'})
     for child in table1.children:
         print(child)
-    print(len(table1))
+    print(len(table1))'''
 
 def log_out(url):
     global s
     xttc = s.get(url)
-    print(xttc.status_code)
+    print('Log out: {}'.format(xttc.status_code))
 
 if __name__ == '__main__':
     print('欢迎使用闵冲的自制查询课表脚本！')
