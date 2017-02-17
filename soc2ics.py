@@ -43,35 +43,9 @@ def user_info():
     """输入个人信息"""
     print(separating)
     input1 = input('\t请输入您的学号：')
-    input2 = getpass.getpass('\t请输入您的密码：')
-    print(separating)
+    input2 = getpass.getpass('\n\t请输入您的密码：')
     return input1, input2
 
-
-def choose_term():
-    """选择学年和学期"""
-    status1 = False
-    status2 = False
-    counter = 0
-    while not (status1 and status2):
-        print(separating)
-        print('\t[1：春季学期]  [3：秋季学期]\n')
-        cho_year = input('\t请输入需要查询的学年：')
-        cho_term = input('\t请输入需要查询的学期：')
-        print(separating)
-        status1 = 1996 <= int(cho_year) <= 2023
-        status2 = (int(cho_term)==1) or (int(cho_term)==3)
-        if status1 and status2:
-            print("\t输入有效！")
-            print(separating)
-            break
-        else:
-            counter += 1
-            if counter >= 3:
-                print("\t你4不4傻？")
-            else:
-                print("\t输入非法！请重新输入！")
-    return cho_year, cho_term
 
 
 def aspx_id(url):
@@ -81,9 +55,9 @@ def aspx_id(url):
     viewstate = bs.find('input', {'id': '__VIEWSTATE'})['value']
     eventvalidation = bs.find('input', {'id': '__EVENTVALIDATION'})['value']
     if r.status_code == 200:
-        print('\t更新ASPX ID：成功')
+        pass
     else:
-        print('\t更新ASPX ID：失败')
+        print('\n\t更新ASPX ID：失败')
     return viewstate, eventvalidation
 
 
@@ -92,10 +66,11 @@ def get_captcha():
     captcha_url = 'jwc_glxt/ValidateCode.aspx'
     r = s.get(host+captcha_url, stream=True)
     # 验证码图片尺寸：60 * 25
+    print(separating)
     if r.status_code == 200:
-        print('\t获取验证码：成功')
+        print('\t获取验证码：成功\n')
     else:
-        print('\t获取验证码：失败')
+        print('\t获取验证码：失败\n')
     captcha = r.content
     # 保存验证码至当前文件夹
     try:
@@ -122,10 +97,36 @@ def log_in():
                   'btnLogin.x': "57",
                   'btnLogin.y': "23"}
     r = s.post(host+login_url, data=login_info)
+    print(separating)
+    time.sleep(1)
     if r.status_code == 200:
         print('\t登录系统：成功')
     else:
         print('\t登录系统：失败')
+
+
+def choose_term():
+    """选择学年和学期"""
+    status1 = False
+    status2 = False
+    counter = 0
+    while not (status1 and status2):
+        print(separating)
+        time.sleep(1)
+        cho_year = input('\t请输入需要查询的学年：')
+        print('\n\t[1：春季学期]  [3：秋季学期]\n')
+        cho_term = input('\t请输入需要查询的学期：')
+        status1 = 1996 <= int(cho_year) <= 2023
+        status2 = (int(cho_term)==1) or (int(cho_term)==3)
+        if status1 and status2:
+            break
+        else:
+            counter += 1
+            if counter >= 3:
+                print("\n\t你4不4傻？")
+            else:
+                print("\n\t输入非法！请重新输入！")
+    return cho_year, cho_term
 
 
 def courses_page(year, term):
@@ -141,6 +142,8 @@ def courses_page(year, term):
               'ctl00$MainContentPlaceHolder$BtnSearch.x': '18',
               'ctl00$MainContentPlaceHolder$BtnSearch.y': '3'}
     r = s.post(host+schedule_url, data=select)
+    print(separating)
+    time.sleep(1)
     if r.status_code == 200:
         print('\t获取课表：成功')
     else:
@@ -150,34 +153,17 @@ def courses_page(year, term):
 
 def get_table(page):
     """从当前页面获取课程列表,并将当前课表网页源码保存至本地"""
+    print(separating)
+    print('\t开始分析页面\n')
     bs = BeautifulSoup(page.text.encode('utf-8'), 'lxml')
     # bs4.BeautifulSoup
     table = bs.find('table', {'id': 'ctl00_MainContentPlaceHolder_GridCourse_Q'})
     # bs4.element.Tag
     with open('table0.html', 'w+', encoding='utf-8') as f:
         f.write(str(table))
-    print('\t尝试显示课表.....')
-    time.sleep(1)
-    print('\t.')
-    time.sleep(1)
-    print('\t..')
-    time.sleep(1)
-    print('\t...')
-    time.sleep(1)
-    print('\t....')
-    time.sleep(1)
-    print('\t.....')
-    time.sleep(1)
-    print('\t......')
-    try:
-        print(table)
-    except UnicodeEncodeError:
-        print('\t显示不了！\n\t去特喵的巨硬!\n\t赶紧给劳资换Mac！\n')
-    finally:
-        time.sleep(3)
-        print('\t换Python3.6！')
-        time.sleep(3)
-        print(separating)
+    if f:
+        time.sleep(1)
+        print('\t抓取课程表成功\n\t已将源码保存为当前目录下的“table0.html”文件')
     return table
 
 
@@ -222,10 +208,11 @@ def get_courses(bs_tag):
 
 def soc2ics(soc):
     """将课表信息写入.ics文件"""
-    time.sleep(1)
-    print('\t开始写入.ics文件……')
     print(separating)
-    print('\t请设置开学第一周周一的日期：')
+    time.sleep(1)
+    print('\t开始写入“*.ics”文件...\n')
+    time.sleep(1)
+    print('\t请设置开学日期：')
     stsy = int(input('\t年：'))
     stsm = int(input('\t月：'))
     stsd = int(input('\t日：'))
@@ -282,7 +269,7 @@ def soc2ics(soc):
     f.write(content_root)
     f.close()
     print(separating)
-    time.sleep(3)
+    time.sleep(1)
     print('\t写入成功！获取课表完成！\n\t请查看同级目录下的“{}-{}-0{}.ics”文件'.format(name,cho_year, cho_term))
 
 
@@ -290,11 +277,12 @@ def log_out():
     """登出教务系统"""
     logout_url = 'jwc_glxt/Login.aspx?xttc=1'
     xttc = s.get(host+logout_url)
+    print(separating)
+    time.sleep(1)
     if xttc.status_code == 200:
         print('\t登出系统：成功')
     else:
         print('\t登出：失败')
-    print(separating)
     return xttc.status_code
 
 
@@ -303,8 +291,8 @@ if __name__ == '__main__':
     host = sel_port()
     name, password = user_info()
     checkcode = get_captcha()
-    cho_year, cho_term = choose_term()
     log_in()
+    cho_year, cho_term = choose_term()
     sche_page = courses_page(cho_year, cho_term)
     log_out()
     table = get_table(sche_page)
