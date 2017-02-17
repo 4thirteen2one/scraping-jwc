@@ -5,24 +5,36 @@
 # Author:4thirteen2one
 
 import os
-import sys
 import re
+import time
 import requests
 from uuid import uuid1
 from datetime import datetime, timedelta
 from bs4 import BeautifulSoup
 import getpass
 
-separating = '-' * 32 + '\n'
+separating = '\n\t'+ '-' * 32 + '\n'
 s = requests.session()
 # 请求头
-headers = {
-    'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:50.0) Gecko/20100101 Firefox/50.0"}
+headers = {'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:50.0) Gecko/20100101 Firefox/50.0"}
 
 
 def sel_port():
     """选择端口"""
-    port = input('请选择查询端口（81端口/84端口）：')
+    print(separating)
+    print('\t[81：81端口]  [84：84端口]\n')
+    port = input('\t请选择查询端口：')
+    counter = 0
+    while port not in ['81','84']:
+        counter += 1
+        if counter >= 3:
+            time.sleep(1)
+            port = input('\n\t“呵呵”\n\n\t:')
+        else:
+            time.sleep(1)
+            print('\n\t“呃......”')
+            time.sleep(2)
+            port  = input('\n\t那啥，你懂的:')
     jwc = 'http://jwc.ctgu.edu.cn:{}/'.format(port)
     return jwc
 
@@ -30,8 +42,8 @@ def sel_port():
 def user_info():
     """输入个人信息"""
     print(separating)
-    input1 = input('请输入您的学号：')
-    input2 = getpass.getpass('请输入您的密码：')
+    input1 = input('\t请输入您的学号：')
+    input2 = getpass.getpass('\t请输入您的密码：')
     print(separating)
     return input1, input2
 
@@ -43,20 +55,22 @@ def choose_term():
     counter = 0
     while not (status1 and status2):
         print(separating)
-        cho_year = input('请输入需要查询的学年：')
-        cho_term = input('请输入需要查询的学期：')
+        print('\t[1：春季学期]  [3：秋季学期]\n')
+        cho_year = input('\t请输入需要查询的学年：')
+        cho_term = input('\t请输入需要查询的学期：')
         print(separating)
         status1 = 1996 <= int(cho_year) <= 2023
-        status2 = 1 <= int(cho_term) <= 4
+        status2 = (int(cho_term)==1) or (int(cho_term)==3)
         if status1 and status2:
-            print("输入有效！")
+            print("\t输入有效！")
             print(separating)
             break
         else:
-            print("输入非法！请重新输入！")
-        counter += 1
-        if counter >= 3:
-            print("你4不4傻？")
+            counter += 1
+            if counter >= 3:
+                print("\t你4不4傻？")
+            else:
+                print("\t输入非法！请重新输入！")
     return cho_year, cho_term
 
 
@@ -66,7 +80,10 @@ def aspx_id(url):
     bs = BeautifulSoup(r.text.encode('utf-8'), 'lxml')
     viewstate = bs.find('input', {'id': '__VIEWSTATE'})['value']
     eventvalidation = bs.find('input', {'id': '__EVENTVALIDATION'})['value']
-    print('Update ASPX ID:{}'.format(r.status_code))
+    if r.status_code == 200:
+        print('\t更新ASPX ID：成功')
+    else:
+        print('\t更新ASPX ID：失败')
     return viewstate, eventvalidation
 
 
@@ -75,7 +92,10 @@ def get_captcha():
     captcha_url = 'jwc_glxt/ValidateCode.aspx'
     r = s.get(host+captcha_url, stream=True)
     # 验证码图片尺寸：60 * 25
-    print('Get captcha: {}'.format(r.status_code))
+    if r.status_code == 200:
+        print('\t获取验证码：成功')
+    else:
+        print('\t获取验证码：失败')
     captcha = r.content
     # 保存验证码至当前文件夹
     try:
@@ -85,7 +105,7 @@ def get_captcha():
         print('IO Error\n')
     os.startfile('captcha.jpg')
     # 这里调用世界上最精密最先进的OCR设备——人的眼睛
-    got = input('Enter captcha：')
+    got = input('\t输入验证码：')
     return got
 
 
@@ -102,7 +122,10 @@ def log_in():
                   'btnLogin.x': "57",
                   'btnLogin.y': "23"}
     r = s.post(host+login_url, data=login_info)
-    print('Log in: {}'.format(r.status_code))
+    if r.status_code == 200:
+        print('\t登录系统：成功')
+    else:
+        print('\t登录系统：失败')
 
 
 def courses_page(year, term):
@@ -118,7 +141,10 @@ def courses_page(year, term):
               'ctl00$MainContentPlaceHolder$BtnSearch.x': '18',
               'ctl00$MainContentPlaceHolder$BtnSearch.y': '3'}
     r = s.post(host+schedule_url, data=select)
-    print('Choose schedule:{}'.format(r.status_code))
+    if r.status_code == 200:
+        print('\t获取课表：成功')
+    else:
+        print('\t获取课表：失败')
     return r
 
 
@@ -130,12 +156,27 @@ def get_table(page):
     # bs4.element.Tag
     with open('table0.html', 'w+', encoding='utf-8') as f:
         f.write(str(table))
+    print('\t尝试显示课表.....')
+    time.sleep(1)
+    print('\t.')
+    time.sleep(1)
+    print('\t..')
+    time.sleep(1)
+    print('\t...')
+    time.sleep(1)
+    print('\t....')
+    time.sleep(1)
+    print('\t.....')
+    time.sleep(1)
+    print('\t......')
     try:
         print(table)
     except UnicodeEncodeError:
-        print('显示不了！\n去特喵的巨硬!\n赶紧给劳资换Mac！\n')
+        print('\t显示不了！\n\t去特喵的巨硬!\n\t赶紧给劳资换Mac！\n')
     finally:
-        print('换Python3.6！')
+        time.sleep(3)
+        print('\t换Python3.6！')
+        time.sleep(3)
         print(separating)
     return table
 
@@ -181,12 +222,13 @@ def get_courses(bs_tag):
 
 def soc2ics(soc):
     """将课表信息写入.ics文件"""
-    print('开始写入.ics文件……')
+    time.sleep(1)
+    print('\t开始写入.ics文件……')
     print(separating)
-    print('请设置开学第一周周一的日期：')
-    stsy = int(input('年：'))
-    stsm = int(input('月：'))
-    stsd = int(input('日：'))
+    print('\t请设置开学第一周周一的日期：')
+    stsy = int(input('\t年：'))
+    stsm = int(input('\t月：'))
+    stsd = int(input('\t日：'))
     term_start = datetime(stsy, stsm, stsd)
     today = datetime.now().strftime('%Y%m%d')
     present = datetime.now().strftime('%H%M%S')
@@ -202,16 +244,15 @@ def soc2ics(soc):
                   4: '174000',
                   5: '204000',
                   6: '224000'}
-    content_head = """
-BEGIN:VCALENDAR
-PRODID:-//CTGU//Schedule of Courses//CN
-VERSION:2.0
-CALSCALE:GREGORIAN
-METHOD:PUBLISH
-X-WR-CALNAME:Schedule of Courses
-X-WR-TIMEZONE:Asia/Shanghai"""
+    content_head = ('BEGIN:VCALENDAR'+'\n'+
+                   'PRODID:-//CTGU//Schedule of Courses//CN'+'\n'+
+                   'VERSION:2.0'+'\n'+
+                   'CALSCALE:GREGORIAN'+'\n'+
+                   'METHOD:PUBLISH'+'\n'+
+                   'X-WR-CALNAME:Schedule of Courses'+'\n'+
+                   'X-WR-TIMEZONE:Asia/Shanghai'+'\n')
 
-    f = open('{}0{}.ics'.format(cho_year, cho_term), 'w+', encoding='utf-8')
+    f = open('{}-{}-0{}.ics'.format(name,cho_year, cho_term), 'w+', encoding='utf-8')
     f.write(content_head)
     # 名称、老师、开始周数、结束周数、上课日期、节次、地点
     for course_info in soc:
@@ -219,49 +260,51 @@ X-WR-TIMEZONE:Asia/Shanghai"""
                                             days=(course_info[4]-1))).strftime('%Y%m%d')
         deadline = (term_start + timedelta(weeks=(course_info[3]-1),
                                            days=(course_info[4]-1))).strftime('%Y%m%d')
-        event = """
-BEGIN:VEVENT
-SUMMARY:{}
-DTSTART;VALUE=DATE-TIME:{}T{}
-DTEND;VALUE=DATE-TIME:{}T{}
-DTSTAMP;VALUE=DATE-TIME:{}T{}Z
-UID:{}
-RRULE:FREQ=WEEKLY;COUNT={};INTERVAL=1
-DESCRIPTION:{}
-LOCATION:{}
-END:VEVENT
-""".format(course_info[0],
-           course_on, lesson_start[course_info[5]],
-           course_on, lesson_end[course_info[5]],
-           today, present,
-           str(uuid1())+'@CTGU',
-           (course_info[3]-course_info[2]+1),
-           course_info[1],
-           course_info[6])
+        event = ('BEGIN:VEVENT'+'\n'+
+                 'SUMMARY:{}'+'\n'+
+                 'DTSTART;VALUE=DATE-TIME:{}T{}'+'\n'+
+                 'DTEND;VALUE=DATE-TIME:{}T{}'+'\n'+
+                 'DTSTAMP;VALUE=DATE-TIME:{}T{}Z'+'\n'+
+                 'UID:{}'+'\n'+
+                 'RRULE:FREQ=WEEKLY;COUNT={};INTERVAL=1'+'\n'+
+                 'DESCRIPTION:{}'+'\n'+
+                 'LOCATION:{}'+'\n'+
+                 'END:VEVENT'+'\n').format(course_info[0],
+                                           course_on, lesson_start[course_info[5]],
+                                           course_on, lesson_end[course_info[5]],
+                                           today, present,
+                                           str(uuid1())+'@CTGU',
+                                           (course_info[3]-course_info[2]+1),
+                                           course_info[1],
+                                           course_info[6])
         f.write(event)
     content_root = """END:VCALENDAR"""
     f.write(content_root)
     f.close()
     print(separating)
-    print('写入成功！\n请查看同级目录下的“{}0{}.ics”文件'.format(cho_year, cho_term))
+    time.sleep(3)
+    print('\t写入成功！获取课表完成！\n\t请查看同级目录下的“{}-{}-0{}.ics”文件'.format(name,cho_year, cho_term))
 
 
 def log_out():
     """登出教务系统"""
     logout_url = 'jwc_glxt/Login.aspx?xttc=1'
     xttc = s.get(host+logout_url)
-    print('Log out: {}'.format(xttc.status_code))
+    if xttc.status_code == 200:
+        print('\t登出系统：成功')
+    else:
+        print('\t登出：失败')
     print(separating)
     return xttc.status_code
 
 
 if __name__ == '__main__':
-    print('欢迎使用4thirteen2one的自制查询课表脚本！\n')
+    print('\n欢迎使用4thirteen2one的自制查询课表脚本！')
     host = sel_port()
     name, password = user_info()
     checkcode = get_captcha()
-    log_in()
     cho_year, cho_term = choose_term()
+    log_in()
     sche_page = courses_page(cho_year, cho_term)
     log_out()
     table = get_table(sche_page)
