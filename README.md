@@ -67,15 +67,13 @@ os：windows下使用os.startfile调用软件打开验证码图片
 
 查询已选课表的请求链接: `http://210.42.38.26:84/jwc_glxt/Course_Choice/Stu_Course_Query.aspx`
 
-    - 查询学年：id?'ctl00$MainContentPlaceHolder$School_Year'
-
-    - 查询学期：id?'ctl00$MainContentPlaceHolder$School_Term'
-
-    - 查询按钮(图标尺寸: 42\*17)
-    
-'ctl00$MainContentPlaceHolder$BtnSearch.x'
-
-'ctl00$MainContentPlaceHolder$BtnSearch.y'
+```
+查询学年：id?'ctl00$MainContentPlaceHolder$School_Year'
+查询学期：id?'ctl00$MainContentPlaceHolder$School_Term'
+查询按钮(图标尺寸: 42\*17)
+    'ctl00$MainContentPlaceHolder$BtnSearch.x'
+    'ctl00$MainContentPlaceHolder$BtnSearch.y'
+```
 
 - ics文件
 
