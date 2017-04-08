@@ -29,7 +29,9 @@ os：windows下使用os.startfile调用软件打开验证码图片
 ![screenshot3](https://github.com/4thirteen2one/scraping-jwc/blob/master/screenshots/screenshot3.PNG)
 8. 从页面中提取课程事件信息，备份至本地文本文件中
 9. 设置学期开始时间，将课程信息逐一写入`*.ics`文件
-
+![screenshot4](https://github.com/4thirteen2one/scraping-jwc/blob/master/screenshots/screenshot4.PNG)
+10. 将所生成ics文件导入outlook日历
+![screenshot5](https://github.com/4thirteen2one/scraping-jwc/blob/master/screenshots/screenshot5.PNG)
 
 ## 附：网页中的几个关键标签
 - __VIEWSTATE & __EVENTVALIDATION
